@@ -3,7 +3,7 @@ import { Ant } from './ant_travelling_salesman';
 
 export interface PheromoneCoverage {
     origin: string,
-    destination: string,    
+    destination: string,
     pheromones: number
 };
 
@@ -77,6 +77,10 @@ export class ACO {
         this.mostMarkedScore = 0;
     }
 
+    public getProblem(): Graph {
+        return this.problem;
+    }
+
     public getBestsolution(): {path: string[], score: number} {
         return {
             path: this.bestSolution,
@@ -104,7 +108,7 @@ export class ACO {
             path: this.mostMarkedSolution,
             score: this.mostMarkedScore
         };
-    } 
+    }
 
     public getCurrentIteration(): number {
         return this.currentIteration;
@@ -136,7 +140,7 @@ export class ACO {
 
         this.solutions = [];
         for (let i = 0 ; i < this.nbAnts; i++) {
-            
+
             console.log("Ants n°" + i);
 
             let ant = new Ant(this.alpha, this.beta, this.gamma);
@@ -192,11 +196,11 @@ export class ACO {
         }
 
         // Evaporate existing pheromones
-        
-        const links = this.problem.getLinks(); 
+
+        const links = this.problem.getLinks();
         for (let link of links) {
             link.pheromones = (1 - this.evaporation) * link.pheromones + link.iterationPheromones;
-        }       
+        }
     }
 
     private updateBestSolution(): void {
@@ -214,8 +218,8 @@ export class ACO {
 
                 let link = this.problem.getLink(origin, destination);
                 score += link.weight;
-            }     
-            
+            }
+
             if (score < bestScore) {
                 bestScore = score;
                 bestSolution = [...s];

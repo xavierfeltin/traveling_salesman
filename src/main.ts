@@ -3,6 +3,11 @@ import { ChartOptimRenderer } from './chartRenderer';
 import { Graph } from './graph';
 import { Renderer } from './renderer';
 
+// Load map information from JSON stored in data
+import * as jsonMap from '../data/berlin52.json';
+let salesMap = Graph.loadFromJSON(jsonMap);
+
+
 let ctx: CanvasRenderingContext2D | null = null;
 let ctxChart: CanvasRenderingContext2D | null = null;
 
@@ -14,7 +19,7 @@ const solveTurnButton = document.getElementById("solveturnbutton");
 const trainingArea = document.getElementById("training");
 const infoArea = document.getElementById("info");
 
-let salesMap = Graph.generate();
+
 let nbMaxIterations = 50;
 let parameters: ACOParameters = {
     alpha: 1.0,
@@ -24,7 +29,7 @@ let parameters: ACOParameters = {
     evaporationRate: 0.5,
     nbAnts: 5,
     maxIterations: nbMaxIterations
-}; 
+};
 let optim = new ACO(parameters, salesMap);
 optim.initialize();
 
@@ -67,21 +72,21 @@ if (solveTurnButton) {
    });
 }
 
-async function solve() {    
+async function solve() {
     for (let i = 0; i < nbMaxIterations; i++)
     {
         optim.optimizeTurn();
         let bestSolution = optim.getBestsolution();
         debugger;
         let mostMarked = optim.getMostMarkedSolution();
-        
+
         if (trainingArea) {
             trainingArea.innerHTML = "<p> " + optim.getCurrentIteration() + " / " +  optim.getMaxIterations() + "</p>";
             trainingArea.innerHTML += "<p> Best path: " + bestSolution.path.join(', ') + "</p>";
             trainingArea.innerHTML += "<p> Best score: " + bestSolution.score + "km </p>";
             trainingArea.innerHTML += "<p> Most Marked path: " + mostMarked.path.join(', ') + "</p>";
             trainingArea.innerHTML += "<p> Most Marked score: " + mostMarked.score + "km </p>";
-        }      
+        }
 
         if (infoArea) {
             let iterations = optim.getBestSolutions();
@@ -94,7 +99,7 @@ async function solve() {
             }
             infoArea.innerHTML = resultHTMLToDisplay;
         }
-        
+
         if (ctx) {
             Renderer.render(ctx, optim, false, true);
         }
@@ -104,21 +109,21 @@ async function solve() {
         }
 
         await sleep(500);
-    }       
+    }
 }
 
 function solveTurn() {
     optim.optimizeTurn();
     let bestSolution = optim.getBestsolution();
     let mostMarked = optim.getMostMarkedSolution();
-    
+
     if (trainingArea) {
         trainingArea.innerHTML = "<p> " + optim.getCurrentIteration() + " / " +  optim.getMaxIterations() + "</p>";
         trainingArea.innerHTML += "<p> Best path: " + bestSolution.path.join(', ') + "</p>";
         trainingArea.innerHTML += "<p> Best score: " + bestSolution.score + "km </p>";
         trainingArea.innerHTML += "<p> Most Marked path: " + mostMarked.path.join(', ') + "</p>";
         trainingArea.innerHTML += "<p> Most Marked score: " + mostMarked.score + "km </p>";
-    }      
+    }
 
     if (infoArea) {
         let iterations = optim.getBestSolutions();
@@ -131,7 +136,7 @@ function solveTurn() {
         }
         infoArea.innerHTML = resultHTMLToDisplay;
     }
-    
+
     if (ctx) {
         Renderer.render(ctx, optim, false, true);
     }
