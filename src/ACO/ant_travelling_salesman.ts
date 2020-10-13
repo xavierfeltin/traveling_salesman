@@ -1,4 +1,4 @@
-import { Graph } from "../graph";
+import { Graph, Link, Node } from "../graph";
 
 export class Ant {
     private path: string[];
@@ -17,29 +17,29 @@ export class Ant {
         const cities = map.getNodes();
         let remainingCities = [...cities];
         const indexStartingPoint = Math.floor(Math.random() * cities.length);
-        let startingPoint = cities[indexStartingPoint];
+        let startingPoint = cities[indexStartingPoint].label;
         let origin = cities[indexStartingPoint];
 
         this.path.push(startingPoint);
 
         // remove the city from cities still to visit
-        remainingCities = remainingCities.filter((val: string) => {
-            return val !== startingPoint;
+        remainingCities = remainingCities.filter((n: Node) => {
+            return n.label !== startingPoint;
         })
         
         while (remainingCities.length > 0) {
-            let nextCity = this.pickNextCity(startingPoint, remainingCities, map);
+            let nextCity = this.pickNextCity(startingPoint, remainingCities.map((n: Node) => {return n.label}), map);
 
             this.path.push(nextCity);
 
             // remove the city from cities still to visit
-            remainingCities = remainingCities.filter((val: string) => {
-                return val !== nextCity;
+            remainingCities = remainingCities.filter((n: Node) => {
+                return n.label !== nextCity;
             });            
             startingPoint = nextCity;
         }
 
-        this.path.push(origin); // And... back to base
+        this.path.push(origin.label); // And... back to base
 
         return this.path;
     }
@@ -72,7 +72,9 @@ export class Ant {
 
         console.log("Going from " + currentCity + ": ");
         for (let i = 0; i < availableCities.length; i++) {
-            console.log("  - To : " + availableCities[i] + "(" + (probabilities[i] * 100.0).toFixed(4) + "%) (" + map.getLink(currentCity, availableCities[i]).pheromones + ")");
+            let link  = map.getLink(currentCity, availableCities[i]);
+            let pheromones = link?.pheromones;
+            console.log("  - To : " + availableCities[i] + "(" + (probabilities[i] * 100.0).toFixed(4) + "%) (" + pheromones + ")");
         }
 
         // Randomly select the next city
@@ -94,14 +96,20 @@ export class Ant {
 
     private computeTransitionalProbability(currentCity: string, nextCity: string, map: Graph): number {
         let nodeCurrentCity = map.getNode(currentCity);
-        
+        let p = 0.0;
+            
         if (nodeCurrentCity) {
-            const pheromonesOnRoad = nodeCurrentCity.links[nextCity].pheromones;
-            const visibility = 1.0 / nodeCurrentCity.links[nextCity].weight;
-            const p = this.gamma + Math.pow(pheromonesOnRoad, this.alpha) * Math.pow(visibility, this.beta);
-            return p;
-        } else {
-            return 0.0;
-        }        
+            let linkNextCity = nodeCurrentCity.links.find((l: Link) => {
+                return l.destination.label === nextCity;
+            });
+
+            if (linkNextCity) {
+                const pheromonesOnRoad = linkNextCity.pheromones;
+                const visibility = 1.0 / linkNextCity.weight;
+                p = this.gamma + Math.pow(pheromonesOnRoad, this.alpha) * Math.pow(visibility, this.beta);
+            }
+        }
+
+        return p;
     }
 }

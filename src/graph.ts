@@ -1,4 +1,5 @@
 export interface Link {
+    origin: Node;
     destination: Node;
     weight: number;
     pheromones: number;
@@ -41,6 +42,7 @@ export class Graph {
 
         if (nA && nB) {
             let linkA: Link = {
+                origin: nA,
                 destination: nB,
                 weight: weight,
                 pheromones: 0,
@@ -50,6 +52,7 @@ export class Graph {
             nA.links.push(linkA);
 
             let linkB: Link = {
+                origin: nB,
                 destination: nA,
                 weight: weight,
                 pheromones: 0,
