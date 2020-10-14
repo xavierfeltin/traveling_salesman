@@ -16,7 +16,7 @@ export class ChartOptimRenderer {
         let data =  {
             labels: iterations,
             datasets: [{
-                label: 'Travel length (km)',
+                label: 'Travel length (m)',
                 borderColor: "#bae755",
                 data: pheromones,
                 fill: false

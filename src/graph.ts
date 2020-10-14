@@ -107,6 +107,7 @@ export class Graph {
 
     public static loadFromJSON(json: {name: string, title: string, data: {id: string, x: number, y: number}[]}): Graph {
         let graph = new Graph();
+        debugger;
 
         // Load nodes
         for (let point of json.data) {
@@ -114,7 +115,7 @@ export class Graph {
         }
 
         // Build links
-        let nodes = graph.getNodes();
+        let nodes = [...graph.getNodes()];
         while (nodes.length > 0) {
             let current = nodes.shift();
             if (current) {
@@ -164,7 +165,7 @@ export class Graph {
 
     public copy(): Graph {
         let g = new Graph();
-        g.nodes = {...this.nodes};
+        g.nodes = [...this.nodes];
         return g;
     }
 }

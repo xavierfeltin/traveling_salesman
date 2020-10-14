@@ -26,7 +26,7 @@ export class Ant {
         remainingCities = remainingCities.filter((n: Node) => {
             return n.label !== startingPoint;
         })
-        
+
         while (remainingCities.length > 0) {
             let nextCity = this.pickNextCity(startingPoint, remainingCities.map((n: Node) => {return n.label}), map);
 
@@ -35,7 +35,7 @@ export class Ant {
             // remove the city from cities still to visit
             remainingCities = remainingCities.filter((n: Node) => {
                 return n.label !== nextCity;
-            });            
+            });
             startingPoint = nextCity;
         }
 
@@ -78,7 +78,7 @@ export class Ant {
         }
 
         // Randomly select the next city
-        const randomSelection = Math.random();        
+        const randomSelection = Math.random();
         let cumulatedProba = 0.0;
         let i = 0;
         while (cumulatedProba <= randomSelection && i < probabilities.length) {
@@ -86,7 +86,7 @@ export class Ant {
 
             if (cumulatedProba <= randomSelection) {
                 i++;
-            }             
+            }
         }
         i = Math.min(i, probabilities.length - 1); //round proba to 1
 
@@ -97,7 +97,7 @@ export class Ant {
     private computeTransitionalProbability(currentCity: string, nextCity: string, map: Graph): number {
         let nodeCurrentCity = map.getNode(currentCity);
         let p = 0.0;
-            
+
         if (nodeCurrentCity) {
             let linkNextCity = nodeCurrentCity.links.find((l: Link) => {
                 return l.destination.label === nextCity;
@@ -107,6 +107,7 @@ export class Ant {
                 const pheromonesOnRoad = linkNextCity.pheromones;
                 const visibility = 1.0 / linkNextCity.weight;
                 p = this.gamma + Math.pow(pheromonesOnRoad, this.alpha) * Math.pow(visibility, this.beta);
+                //p = Math.pow(pheromonesOnRoad, this.alpha) * Math.pow(visibility, this.beta);
             }
         }
 

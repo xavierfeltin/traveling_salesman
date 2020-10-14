@@ -5,8 +5,8 @@ import { Renderer } from './renderer';
 
 // Load map information from JSON stored in data
 import * as jsonMap from '../data/berlin52.json';
+import { MapRenderer } from './mapRenderer';
 let salesMap = Graph.loadFromJSON(jsonMap);
-
 
 let ctx: CanvasRenderingContext2D | null = null;
 let ctxChart: CanvasRenderingContext2D | null = null;
@@ -19,21 +19,21 @@ const solveTurnButton = document.getElementById("solveturnbutton");
 const trainingArea = document.getElementById("training");
 const infoArea = document.getElementById("info");
 
-
-let nbMaxIterations = 50;
+let nbMaxIterations = 500;
 let parameters: ACOParameters = {
-    alpha: 1.0,
-    beta: 1.0,
-    gamma: 1.0E-4,
-    Q: 1.0,
-    evaporationRate: 0.5,
-    nbAnts: 5,
+    alpha: 0.9,
+    beta: 1.2,
+    gamma: 0.0,
+    Q: 0.2,
+    evaporationRate: 0.15,
+    nbAnts: 30,
     maxIterations: nbMaxIterations
 };
 let optim = new ACO(parameters, salesMap);
 optim.initialize();
 
 let chart: Chart;
+let map: Chart;
 
 // Rendering
 if (canvas && canvas.getContext('2d')) {
@@ -43,7 +43,8 @@ if (canvas && canvas.getContext('2d')) {
     }
 
     if (ctx) {
-        Renderer.render(ctx, optim, true, false);
+        //Renderer.render(ctx, optim, true, false);
+        map = MapRenderer.initialize(ctx, optim.getProblem());
     }
 
 }
@@ -83,9 +84,9 @@ async function solve() {
         if (trainingArea) {
             trainingArea.innerHTML = "<p> " + optim.getCurrentIteration() + " / " +  optim.getMaxIterations() + "</p>";
             trainingArea.innerHTML += "<p> Best path: " + bestSolution.path.join(', ') + "</p>";
-            trainingArea.innerHTML += "<p> Best score: " + bestSolution.score + "km </p>";
+            trainingArea.innerHTML += "<p> Best score: " + bestSolution.score + "m / 7542 (m) for Berlin52</p>";
             trainingArea.innerHTML += "<p> Most Marked path: " + mostMarked.path.join(', ') + "</p>";
-            trainingArea.innerHTML += "<p> Most Marked score: " + mostMarked.score + "km </p>";
+            trainingArea.innerHTML += "<p> Most Marked score: " + mostMarked.score + "m / 7542 (m) for Berlin52 </p>";
         }
 
         if (infoArea) {
@@ -94,14 +95,15 @@ async function solve() {
             let idx = 1;
             for (let it of iterations) {
                 resultHTMLToDisplay += "<p> It " + idx + " : " + it.path.join(', ');
-                resultHTMLToDisplay += " - score: " + it.score + "km </p>";
+                resultHTMLToDisplay += " - score: " + it.score + "m </p>";
                 idx++;
             }
             infoArea.innerHTML = resultHTMLToDisplay;
         }
 
         if (ctx) {
-            Renderer.render(ctx, optim, false, true);
+            //Renderer.render(ctx, optim, false, true);
+            MapRenderer.render(map, optim.getProblem(), optim.getBestsolution().path);
         }
 
         if (ctxChart) {
@@ -120,9 +122,9 @@ function solveTurn() {
     if (trainingArea) {
         trainingArea.innerHTML = "<p> " + optim.getCurrentIteration() + " / " +  optim.getMaxIterations() + "</p>";
         trainingArea.innerHTML += "<p> Best path: " + bestSolution.path.join(', ') + "</p>";
-        trainingArea.innerHTML += "<p> Best score: " + bestSolution.score + "km </p>";
+        trainingArea.innerHTML += "<p> Best score: " + bestSolution.score + "m / 7542 (m) for Berlin52</p>";
         trainingArea.innerHTML += "<p> Most Marked path: " + mostMarked.path.join(', ') + "</p>";
-        trainingArea.innerHTML += "<p> Most Marked score: " + mostMarked.score + "km </p>";
+        trainingArea.innerHTML += "<p> Most Marked score: " + mostMarked.score + "m / 7542 (m) for Berlin52 </p>";
     }
 
     if (infoArea) {
@@ -131,14 +133,15 @@ function solveTurn() {
         let idx = 1;
         for (let it of iterations) {
             resultHTMLToDisplay += "<p> It " + idx + " : " + it.path.join(', ');
-            resultHTMLToDisplay += " - score: " + it.score + "km </p>";
+            resultHTMLToDisplay += " - score: " + it.score + "m </p>";
             idx++;
         }
         infoArea.innerHTML = resultHTMLToDisplay;
     }
 
     if (ctx) {
-        Renderer.render(ctx, optim, false, true);
+        //Renderer.render(ctx, optim, false, true);
+        MapRenderer.render(map, optim.getProblem(), optim.getBestsolution().path);
     }
 
     if (ctxChart) {
