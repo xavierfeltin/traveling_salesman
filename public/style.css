@@ -1,5 +1,25 @@
+.body {
+    font: 1rem 'Fira Sans', sans-serif;
+}
+
 .grid-container {
     display: grid;
     grid-template-columns: 1fr 1fr;
     grid-gap: 10px;
+}
+
+.form-container {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    grid-gap: 10px;
+    grid-auto-rows: minmax(100px, auto);
+}
+
+label {
+    display: block;    
+}
+
+input,
+label {
+    margin: .4rem 0;
 }

@@ -8,16 +8,50 @@
     <link rel="stylesheet" href="style.css">    
 </head>
 <body>
-    <div id="main"></div>
+    <div id="main">
+        <p>Parameters of the Ant Colony Optimization:</p>
+        <form class="form-container">
+            <div>
+                <label for="alpha">Alpha:</label>
+                <input type="number" id="alpha" name="alpha" min="0" max="10" step="any" value="0.9">
+            </div>
+            <div>
+                <label for="beta">Beta:</label>
+                <input type="number" id="beta" name="beta" min="0" max="10" step="any" value="1.2">
+            </div>
+            <div>
+                <label for="gamma">Gamma:</label>
+                <input type="number" id="gamma" name="gamma" min="0" max="10" step="any" value="0.0">
+            </div>
+            <div>
+                <label for="q">Q:</label>
+                <input type="number" id="q" name="q" min="0" max="10" step="any" value="0.0">
+            </div>
+            <div>
+                <label for="evaporation">Evaporation:</label>
+                <input type="number" id="evaporation" name="evaporation" min="0" max="1" step="any" value="0.15">
+            </div>
+            <div>
+                <label for="ants">Ants:</label>
+                <input type="number" id="ants" name="ants" min="1" max="100" value="30">
+            </div>
+            <div>
+                <label for="iterations">Iterations:</label>
+                <input type="number" id="iterations" name="iterations" min="10" max="500" value="500">
+            </div>        
+        </form>
+    </div>
 
     <div id="actions">
+        <input type="button" value="Search better parameters" id="searchbutton"></input>
         <input type="button" value="Solve" id="solvebutton"></input>
         <input type="button" value="Solve Turn" id="solveturnbutton"></input>
     </div>
     
     <div id ="training"></div>
 
-    <div class="grid-container">
+    <p>Traveling salesman map:</p>
+    <div class="grid-container">        
         <div> <canvas id="area"/> </div>
         <div> <canvas id="chart"/> </div>
     </div>

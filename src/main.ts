@@ -14,20 +14,27 @@ let ctxChart: CanvasRenderingContext2D | null = null;
 const canvas = <HTMLCanvasElement> document.getElementById('area');
 const canvasChart = <HTMLCanvasElement> document.getElementById('chart');
 
+const searchButton = document.getElementById("searchbutton"); 
 const solveButton = document.getElementById("solvebutton");
 const solveTurnButton = document.getElementById("solveturnbutton");
 const trainingArea = document.getElementById("training");
 const infoArea = document.getElementById("info");
 
-let nbMaxIterations = 500;
+const parametersInputValues: number[] = [];
+const parametersNames: string[] = ["alpha", "beta", "gamma", "q", "evaporation", "ants", "iterations"];
+for (let name of parametersNames) {
+    const inputElement = <HTMLInputElement> document.getElementById(name);
+    parametersInputValues.push(parseFloat(inputElement.value));
+}
+
 let parameters: ACOParameters = {
-    alpha: 0.9,
-    beta: 1.2,
-    gamma: 0.0,
-    Q: 0.2,
-    evaporationRate: 0.15,
-    nbAnts: 30,
-    maxIterations: nbMaxIterations
+    alpha: parametersInputValues[0], //0.9,
+    beta: parametersInputValues[1], //1.2,
+    gamma: parametersInputValues[2], //0.0,
+    Q: parametersInputValues[3], //0.2,
+    evaporationRate: parametersInputValues[4], //0.15,
+    nbAnts: parametersInputValues[5], //30,
+    maxIterations: parametersInputValues[6] //500
 };
 let optim = new ACO(parameters, salesMap);
 optim.initialize();
@@ -73,8 +80,12 @@ if (solveTurnButton) {
    });
 }
 
+if (searchButton) {
+    // launch tuning of ACO parameters
+}
+
 async function solve() {
-    for (let i = 0; i < nbMaxIterations; i++)
+    for (let i = 0; i < parameters.maxIterations; i++)
     {
         optim.optimizeTurn();
         let bestSolution = optim.getBestsolution();
