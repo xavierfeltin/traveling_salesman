@@ -131,6 +131,13 @@ export class ACO {
         return coverage;
     }
 
+    public optimize(): void  {
+        for (let i = 0; i < this.maxIterations; i++)
+        {
+            this.optimizeTurn();
+        }
+    }
+
     public optimizeTurn(): void {
         if (this.currentIteration == this.maxIterations) {
             return;
