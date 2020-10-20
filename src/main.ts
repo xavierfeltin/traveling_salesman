@@ -6,6 +6,7 @@ import { Renderer } from './renderer';
 // Load map information from JSON stored in data
 import * as jsonMap from '../data/berlin52.json';
 import { MapRenderer } from './mapRenderer';
+import { Genetic, GenParameters, Options } from './tuning/genetic';
 let salesMap = Graph.loadFromJSON(jsonMap);
 
 let ctx: CanvasRenderingContext2D | null = null;
@@ -38,6 +39,21 @@ let parameters: ACOParameters = {
 };
 let optim = new ACO(parameters, salesMap);
 optim.initialize();
+
+
+let genParameters: GenParameters = {
+    maxIterations: 30,
+    populationSize: 20,
+    crossoverRate: 0.5,
+    mutationRate: 0.05,
+    nbKeepBestIndividuals: 1
+};
+
+let genOptions: Options = {
+    salesMap: salesMap
+};
+let ag = new Genetic(genParameters, genOptions);
+ag.initialize();
 
 let chart: Chart;
 let map: Chart;
@@ -82,6 +98,9 @@ if (solveTurnButton) {
 
 if (searchButton) {
     // launch tuning of ACO parameters
+    searchButton.addEventListener("click", (e:Event) => {
+        tuneParameters();
+   });
 }
 
 async function solve() {
@@ -89,7 +108,6 @@ async function solve() {
     {
         optim.optimizeTurn();
         let bestSolution = optim.getBestsolution();
-        debugger;
         let mostMarked = optim.getMostMarkedSolution();
 
         if (trainingArea) {
@@ -158,6 +176,11 @@ function solveTurn() {
     if (ctxChart) {
         ChartOptimRenderer.render(chart, optim);
     }
+}
+
+function tuneParameters() {
+    const bestIndividual = ag.optimize();    
+    console.log("parameters: " + JSON.stringify(bestIndividual.adn) + ", fitness: " + bestIndividual.fitness + ", proba: " + bestIndividual.probability);
 }
 
 function sleep(ms: number) {

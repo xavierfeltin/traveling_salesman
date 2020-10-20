@@ -70,11 +70,11 @@ export class Ant {
             return value / sumProbabilities;
         });
 
-        console.log("Going from " + currentCity + ": ");
+        // console.log("Going from " + currentCity + ": ");
         for (let i = 0; i < availableCities.length; i++) {
             let link  = map.getLink(currentCity, availableCities[i]);
             let pheromones = link?.pheromones;
-            console.log("  - To : " + availableCities[i] + "(" + (probabilities[i] * 100.0).toFixed(4) + "%) (" + pheromones + ")");
+            // console.log("  - To : " + availableCities[i] + "(" + (probabilities[i] * 100.0).toFixed(4) + "%) (" + pheromones + ")");
         }
 
         // Randomly select the next city
@@ -90,7 +90,7 @@ export class Ant {
         }
         i = Math.min(i, probabilities.length - 1); //round proba to 1
 
-        console.log("Choose to go to : " + availableCities[i] + " (" + (randomSelection * 100.0).toFixed(4) + "%)");
+        // console.log("Choose to go to : " + availableCities[i] + " (" + (randomSelection * 100.0).toFixed(4) + "%)");
         return availableCities[i];
     }
 

@@ -107,8 +107,7 @@ export class Graph {
 
     public static loadFromJSON(json: {name: string, title: string, data: {id: string, x: number, y: number}[]}): Graph {
         let graph = new Graph();
-        debugger;
-
+        
         // Load nodes
         for (let point of json.data) {
             graph.addNode(point.id, point.x, point.y);

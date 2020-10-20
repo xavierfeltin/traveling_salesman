@@ -148,12 +148,12 @@ export class ACO {
         this.solutions = [];
         for (let i = 0 ; i < this.nbAnts; i++) {
 
-            console.log("Ants n°" + i);
+            // console.log("Ants n°" + i);
 
             let ant = new Ant(this.alpha, this.beta, this.gamma);
             this.ants.push(ant);
             let solution = ant.randomWalk(this.problem);
-            console.log("solution: " + solution.join(", "));
+            // console.log("solution: " + solution.join(", "));
             this.solutions.push(solution);
         }
 
