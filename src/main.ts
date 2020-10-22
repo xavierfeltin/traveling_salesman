@@ -15,7 +15,7 @@ let ctxChart: CanvasRenderingContext2D | null = null;
 const canvas = <HTMLCanvasElement> document.getElementById('area');
 const canvasChart = <HTMLCanvasElement> document.getElementById('chart');
 
-const searchButton = document.getElementById("searchbutton"); 
+const searchButton = document.getElementById("searchbutton");
 const solveButton = document.getElementById("solvebutton");
 const solveTurnButton = document.getElementById("solveturnbutton");
 const trainingArea = document.getElementById("training");
@@ -43,14 +43,20 @@ optim.initialize();
 
 let genParameters: GenParameters = {
     maxIterations: 30,
-    populationSize: 20,
-    crossoverRate: 0.5,
-    mutationRate: 0.05,
+    populationSize: 50,
+    crossoverRate: 0.8, // use smart crossover
+    mutationRate: 0.1,
     nbKeepBestIndividuals: 1
 };
 
 let genOptions: Options = {
-    salesMap: salesMap
+    salesMap: salesMap,
+    ranges: {
+        alpha: {min: 0.0, max: 10.0},
+        beta: {min: 0.0, max: 10.0},
+        Q: {min: 0.0, max: 3.0},
+        evaporationRate: {min: 0.0, max: 1.0},
+    }
 };
 let ag = new Genetic(genParameters, genOptions);
 ag.initialize();
@@ -179,7 +185,7 @@ function solveTurn() {
 }
 
 function tuneParameters() {
-    const bestIndividual = ag.optimize();    
+    const bestIndividual = ag.optimize();
     console.log("parameters: " + JSON.stringify(bestIndividual.adn) + ", fitness: " + bestIndividual.fitness + ", proba: " + bestIndividual.probability);
 }
 
