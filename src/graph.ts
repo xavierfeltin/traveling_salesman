@@ -11,14 +11,16 @@ export interface Node {
     label: string;
     x: number;
     y: number;
-    links: Link[];
+    links: {
+        [key: string]: Link;
+    };
 }
 
 export class Graph {
-    private nodes: Node[];
+   private nodes!: any; 
 
     constructor() {
-        this.nodes = [];
+        this.nodes = {};
     }
 
     public addNode(label: string, x: number, y: number): void {
@@ -26,20 +28,15 @@ export class Graph {
             label: label,
             x: x,
             y: y,
-            links: []
+            links: {}
         }
-        this.nodes.push(node);
+        this.nodes[label] = node;
     }
 
     public addLink(nodeA: string, nodeB: string, weight: number): void {
-        let nA = this.nodes.find((n: Node) => {
-            return n.label === nodeA;
-        });
-
-        let nB = this.nodes.find((n: Node) => {
-            return n.label === nodeB;
-        });
-
+        let nA = this.nodes[nodeA];
+        let nB = this.nodes[nodeB];
+        
         if (nA && nB) {
             let linkA: Link = {
                 origin: nA,
@@ -49,7 +46,7 @@ export class Graph {
                 iterationPheromones: 0,
                 nbTakenPath: 0
             };
-            nA.links.push(linkA);
+            nA.links[linkA.destination.label] = linkA;
 
             let linkB: Link = {
                 origin: nB,
@@ -59,32 +56,33 @@ export class Graph {
                 iterationPheromones: 0,
                 nbTakenPath: 0
             };
-            nB.links.push(linkB);
+            nB.links[linkB.destination.label] = linkB;
         }
     }
 
     public getNode(name: string): Node | undefined {
-        let node = this.nodes.find((n: Node) => {
-            return n.label === name;
-        });
-        return node;
+        return this.nodes[name];
     }
 
     public getNodes(): Node[] {
-        return this.nodes;
+        const nodes = [];
+        for (let k of Object.keys(this.nodes)) {
+            nodes.push(this.nodes[k]);
+        }
+        return nodes;
     }
 
     public getNodesLabel(): string[] {
-        return this.nodes.map((n: Node) => {
-            return n.label;
-        });
+        return Object.keys(this.nodes);
     }
 
     public getLinks(): Link[] {
         let links: Link[] = [];
-        for (let n of this.nodes) {
-            for(let l of n.links) {
-                links.push(l);
+        
+        for (let k of Object.keys(this.nodes)) {
+            const n = this.nodes[k];
+            for (let kl of Object.keys(n.links)) {
+                links.push(n.links[kl]);
             }
         }
         return links;
@@ -92,14 +90,10 @@ export class Graph {
 
     public getLink(origin: string, destination: string): Link | undefined {
         let link;
-        let nA = this.nodes.find((n: Node) => {
-            return n.label === origin;
-        });
+        let nA = this.nodes[origin];
 
         if (nA) {
-            link = nA.links.find((l: Link) => {
-                return l.destination.label === destination;
-            });
+           link = nA.links[destination];
         }
 
         return link;
@@ -164,7 +158,8 @@ export class Graph {
 
     public copy(): Graph {
         let g = new Graph();
-        g.nodes = [...this.nodes];
+        //g.nodes = [...this.nodes];
+        g.nodes = {...this.nodes};
         return g;
     }
 }

@@ -71,11 +71,11 @@ export class Ant {
         });
 
         // console.log("Going from " + currentCity + ": ");
-        for (let i = 0; i < availableCities.length; i++) {
-            let link  = map.getLink(currentCity, availableCities[i]);
-            let pheromones = link?.pheromones;
+        //for (let i = 0; i < availableCities.length; i++) {
+        //    let link  = map.getLink(currentCity, availableCities[i]);
+            // let pheromones = link?.pheromones;
             // console.log("  - To : " + availableCities[i] + "(" + (probabilities[i] * 100.0).toFixed(4) + "%) (" + pheromones + ")");
-        }
+        //}
 
         // Randomly select the next city
         const randomSelection = Math.random();
@@ -99,15 +99,12 @@ export class Ant {
         let p = 0.0;
 
         if (nodeCurrentCity) {
-            let linkNextCity = nodeCurrentCity.links.find((l: Link) => {
-                return l.destination.label === nextCity;
-            });
+           let linkNextCity = nodeCurrentCity.links[nextCity];
 
             if (linkNextCity) {
                 const pheromonesOnRoad = linkNextCity.pheromones;
                 const visibility = 1.0 / linkNextCity.weight;
                 p = this.gamma + Math.pow(pheromonesOnRoad, this.alpha) * Math.pow(visibility, this.beta);
-                //p = Math.pow(pheromonesOnRoad, this.alpha) * Math.pow(visibility, this.beta);
             }
         }
 

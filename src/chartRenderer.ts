@@ -1,8 +1,10 @@
 import { ACO } from "./ACO/ant_colony_optimizer";
 import { Chart } from "chart.js";
+import { ACOMinMax } from "./ACO/ant_colony_optimizer_minmax";
 
 export class ChartOptimRenderer {
-    public static initialize(ctx: CanvasRenderingContext2D, optim: ACO): Chart {
+    //public static initialize(ctx: CanvasRenderingContext2D, optim: ACO): Chart {
+        public static initialize(ctx: CanvasRenderingContext2D, optim: ACOMinMax): Chart {
         let pheromones: number[] = [];
         let iterations: number[] = [];
 
@@ -41,19 +43,19 @@ export class ChartOptimRenderer {
 
         return myChart
     }
-    public static render(chart: Chart, optim: ACO): void {
-        let pheromones: number[] = [];
+    //public static render(chart: Chart, optim: ACO): void {
+    public static render(chart: Chart, values: number[]): void {
+        let scores: number[] = [];
         let iterations: number[] = [];
 
-        const paths = optim.getBestSolutions();
-        for (let i = 0; i < paths.length; i++)
+        for (let i = 0; i < values.length; i++)
         {
-            pheromones.push(paths[i].score);
+            scores.push(values[i]);
             iterations.push(i+1);
         }
 
         if (chart.data.datasets) {
-            chart.data.datasets[0].data = pheromones;
+            chart.data.datasets[0].data = scores;
         }
         chart.data.labels = iterations;
 

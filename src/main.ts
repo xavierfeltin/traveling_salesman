@@ -1,7 +1,7 @@
-import { ACO, ACOParameters } from './ACO/ant_colony_optimizer';
+import { ACOParameters } from './ACO/ant_colony';
+import { ACOMinMax } from './ACO/ant_colony_optimizer_minmax';
 import { ChartOptimRenderer } from './chartRenderer';
 import { Graph } from './graph';
-import { Renderer } from './renderer';
 
 // Load map information from JSON stored in data
 import * as jsonMap from '../data/berlin52.json';
@@ -22,7 +22,7 @@ const trainingArea = document.getElementById("training");
 const infoArea = document.getElementById("info");
 
 const parametersInputValues: number[] = [];
-const parametersNames: string[] = ["alpha", "beta", "gamma", "q", "evaporation", "ants", "iterations"];
+const parametersNames: string[] = ["alpha", "beta", "gamma", "q", "evaporation", "pBest", "smoothing", "ants", "iterations"];
 for (let name of parametersNames) {
     const inputElement = <HTMLInputElement> document.getElementById(name);
     parametersInputValues.push(parseFloat(inputElement.value));
@@ -34,28 +34,36 @@ let parameters: ACOParameters = {
     gamma: parametersInputValues[2], //0.0,
     Q: parametersInputValues[3], //0.2,
     evaporationRate: parametersInputValues[4], //0.15,
-    nbAnts: parametersInputValues[5], //30,
-    maxIterations: parametersInputValues[6] //500
+    pBest: parametersInputValues[5],
+    smoothing: parametersInputValues[6],
+    nbAnts: parametersInputValues[7], //30,
+    maxIterations: parametersInputValues[8] //500
 };
-let optim = new ACO(parameters, salesMap);
-optim.initialize();
+
+//let optim = new ACO(parameters, salesMap);
+let optim: ACOMinMax = new ACOMinMax(parameters, salesMap);
+//optim.initialize();
 
 
 let genParameters: GenParameters = {
     maxIterations: 30,
-    populationSize: 50,
-    crossoverRate: 0.8, // use smart crossover
-    mutationRate: 0.1,
+    populationSize: 20,
+    crossoverRate: 0.9, // use smart crossover
+    mutationRate: 0.3,
     nbKeepBestIndividuals: 1
 };
 
 let genOptions: Options = {
     salesMap: salesMap,
     ranges: {
-        alpha: {min: 0.0, max: 10.0},
-        beta: {min: 0.0, max: 10.0},
-        Q: {min: 0.0, max: 3.0},
+        alpha: {min: 0.0, max: 100.0},
+        beta: {min: 0.0, max: 100.0},
+        Q: {min: 0.0, max: 10.0},
         evaporationRate: {min: 0.0, max: 1.0},
+        pBest: {min: 0.6, max: 1.0},
+        smoothing: {min: 0.0, max: 1.0},
+        nbAnts: {min: 20, max: 60},
+        maxIterations: {min: 50, max: 300}
     }
 };
 let ag = new Genetic(genParameters, genOptions);
@@ -92,7 +100,30 @@ if (canvasChart && canvasChart.getContext('2d')) {
 // Optimization
 if (solveButton) {
     solveButton.addEventListener("click", (e:Event) => {
-         solve();
+        const parametersInputValues: number[] = [];
+        const parametersNames: string[] = ["alpha", "beta", "gamma", "q", "evaporation", "pBest", "smoothing", "ants", "iterations"];
+        for (let name of parametersNames) {
+            const inputElement = <HTMLInputElement> document.getElementById(name);
+            parametersInputValues.push(parseFloat(inputElement.value));
+        }
+
+        parameters = {
+            alpha: parametersInputValues[0], //0.9,
+            beta: parametersInputValues[1], //1.2,
+            gamma: parametersInputValues[2], //0.0,
+            Q: parametersInputValues[3], //0.2,
+            evaporationRate: parametersInputValues[4], //0.15,
+            pBest: parametersInputValues[5],
+            smoothing: parametersInputValues[6],
+            nbAnts: parametersInputValues[7], //30,
+            maxIterations: parametersInputValues[8] //500
+        };
+
+        //let optim = new ACO(parameters, salesMap);
+        optim = new ACOMinMax(parameters, salesMap);
+        optim.initialize();
+
+        solve();
     });
 }
 
@@ -110,6 +141,7 @@ if (searchButton) {
 }
 
 async function solve() {
+    console.log("Parameters: " + JSON.stringify(parameters));
     for (let i = 0; i < parameters.maxIterations; i++)
     {
         optim.optimizeTurn();
@@ -142,7 +174,12 @@ async function solve() {
         }
 
         if (ctxChart) {
-            ChartOptimRenderer.render(chart, optim);
+            const paths = optim.getBestSolutions();
+            const scores = [];
+            for(const path of paths) {
+                scores.push(path.score);
+            }
+            ChartOptimRenderer.render(chart, scores);
         }
 
         await sleep(500);
@@ -180,13 +217,55 @@ function solveTurn() {
     }
 
     if (ctxChart) {
-        ChartOptimRenderer.render(chart, optim);
+        const paths = optim.getBestSolutions();
+        const scores = [];
+        for(const path of paths) {
+            scores.push(path.score);
+        }
+        ChartOptimRenderer.render(chart, scores);
     }
 }
 
-function tuneParameters() {
-    const bestIndividual = ag.optimize();
-    console.log("parameters: " + JSON.stringify(bestIndividual.adn) + ", fitness: " + bestIndividual.fitness + ", proba: " + bestIndividual.probability);
+async function tuneParameters() {
+    for (let i = 0; i < ag.getMaxIterations(); i++)
+    {
+        ag.optimizeByStep();
+        let bestSolution = ag.getBestIndividual();
+
+        if (trainingArea) {
+            trainingArea.innerHTML = "<p> " + ag.getCurrentIteration() + " / " +  ag.getMaxIterations() + "</p>";
+            trainingArea.innerHTML += "<p> Best path length: " + bestSolution.fitness + "</p>";
+            trainingArea.innerHTML += "<p> Best fitness: " + bestSolution.stdFitness + "</p>";
+            trainingArea.innerHTML += "<p> Best parameters: " + JSON.stringify(bestSolution.adn) + "</p>";
+        }
+
+        if (infoArea) {
+            let individuals = ag.getBestIndividuals();
+            let resultHTMLToDisplay = "";
+            let idx = 1;
+            for (let ind of individuals) {
+                resultHTMLToDisplay += "<p> It " + idx + " : " + JSON.stringify(ind.adn);
+                resultHTMLToDisplay += " - fitness: " + ind.fitness + "m </p>";
+                idx++;
+            }
+            infoArea.innerHTML = resultHTMLToDisplay;
+        }
+
+        if (ctx) {
+            //MapRenderer.render(map, optim.getProblem(), optim.getBestsolution().path);
+        }
+
+        if (ctxChart) {
+            const individuals = ag.getBestIndividuals();
+            const scores = [];
+            for(const ind of individuals) {
+                scores.push(ind.stdFitness);
+            }
+            ChartOptimRenderer.render(chart, scores);
+        }
+
+        await sleep(500);
+    }
 }
 
 function sleep(ms: number) {
